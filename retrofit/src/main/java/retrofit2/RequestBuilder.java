@@ -186,6 +186,14 @@ final class RequestBuilder {
     this.body = body;
   }
 
+  /**
+   * 【wanghailu】构建Request对象
+   * 1、RequestBody有三种方式构建。
+   * 方式1、[FormBody.Builder]
+   * 方式2、[MultipartBody.Builder]
+   * 方式3、[用户自定义RequestBod类型]
+   * @return
+   */
   Request build() {
     HttpUrl url;
     HttpUrl.Builder urlBuilder = this.urlBuilder;

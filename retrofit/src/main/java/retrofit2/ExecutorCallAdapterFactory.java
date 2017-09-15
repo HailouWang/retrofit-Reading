@@ -30,6 +30,13 @@ final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
     this.callbackExecutor = callbackExecutor;
   }
 
+  /**
+   * 【wanghail】通过Type，得到CallAdapter<?, ?>
+   * 1、Interface 对象的返回类型必须为Call.class
+   * 2、CallAdapter重写方法responseType
+   * 3、得到Call<Object>对象，此处Call<Object> = OkHttpCall<Object>;
+   * Android平台，劳工 = callbackExecutor = Handler。
+   */
   @Override
   public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
     if (getRawType(returnType) != Call.class) {
@@ -47,6 +54,11 @@ final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
     };
   }
 
+  /**
+   * 【wanghailu】代理模式  构建ExecutorCallbackCall对象实现。
+   *
+   * @param <T>
+   */
   static final class ExecutorCallbackCall<T> implements Call<T> {
     final Executor callbackExecutor;
     final Call<T> delegate;

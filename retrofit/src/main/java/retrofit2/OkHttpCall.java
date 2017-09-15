@@ -51,6 +51,9 @@ final class OkHttpCall<T> implements Call<T> {
     return new OkHttpCall<>(serviceMethod, args);
   }
 
+  /**
+   * 【王海路】构建Request对象
+   */
   @Override public synchronized Request request() {
     okhttp3.Call call = rawCall;
     if (call != null) {
@@ -143,6 +146,11 @@ final class OkHttpCall<T> implements Call<T> {
     return executed;
   }
 
+  /**
+   * 【wanghailu】按照ServiceMethod中解析的数据，进行执行
+   * 1、只能执行一次，再次执行会抛出IllegalStateException异常。
+   * 2、通过parseResponse解析okhttp3.Response，得到Response<T>。
+   */
   @Override public Response<T> execute() throws IOException {
     okhttp3.Call call;
 
@@ -176,6 +184,13 @@ final class OkHttpCall<T> implements Call<T> {
     return parseResponse(call.execute());
   }
 
+  /**
+   * 【wanghailu】构建真实工作的Call对象
+   * 1、构建Request对象。ServiceMethod.toRequest(args);
+   * 2、构建Call对象。ServiceMethod.callFactory.newCall(request);
+   * @return
+   * @throws IOException
+   */
   private okhttp3.Call createRawCall() throws IOException {
     Request request = serviceMethod.toRequest(args);
     okhttp3.Call call = serviceMethod.callFactory.newCall(request);
@@ -185,6 +200,19 @@ final class OkHttpCall<T> implements Call<T> {
     return call;
   }
 
+  /**
+   * 【wanghailu】解析okhttp3.Response，得到Response<T>。
+   * 1、得到error的Response对象。
+   * Response.error(bufferedBody, rawResponse);
+   * 2、得到success的Response对象。
+   * Response.success(null, rawResponse);
+   * 3、通过ServiceMethod.toResponse得到ResponseBody对象。
+   * T body = ServiceMethod.toResponse(catchingBody);
+   * return Response.success(body, rawResponse);
+   * @param rawResponse
+   * @return
+   * @throws IOException
+   */
   Response<T> parseResponse(okhttp3.Response rawResponse) throws IOException {
     ResponseBody rawBody = rawResponse.body();
 

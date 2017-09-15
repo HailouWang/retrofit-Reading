@@ -37,6 +37,8 @@ import retrofit2.http.QueryMap;
  * Convert objects to and from their representation in HTTP. Instances are created by {@linkplain
  * Factory a factory} which is {@linkplain Retrofit.Builder#addConverterFactory(Factory) installed}
  * into the {@link Retrofit} instance.
+ * 【wanghailu】Convert将HTTP描述内容转换成Object对象。Convert对象有Convert.Factory工厂创建。
+ * 工厂由Retrofit.Builder#addConverterFactory(Factory)来创建使用。
  */
 public interface Converter<F, T> {
   T convert(F value) throws IOException;
@@ -48,6 +50,8 @@ public interface Converter<F, T> {
      * {@code type} cannot be handled by this factory. This is used to create converters for
      * response types such as {@code SimpleResponse} from a {@code Call<SimpleResponse>}
      * declaration.
+     * 【wanghailu】转换HTTP响应body数据为Type类型，如果factory无法转换，返回null。
+     * 这个方法为响应Response数据类型创建Convert。例如：SimpleResponse。
      */
     public @Nullable Converter<ResponseBody, ?> responseBodyConverter(Type type,
         Annotation[] annotations, Retrofit retrofit) {
@@ -59,6 +63,8 @@ public interface Converter<F, T> {
      * {@code type} cannot be handled by this factory. This is used to create converters for types
      * specified by {@link Body @Body}, {@link Part @Part}, and {@link PartMap @PartMap}
      * values.
+     * 
+     * 【wanghailu】这个方法为Body、Part、PartMap数据类型创建Convert。
      */
     public @Nullable Converter<?, RequestBody> requestBodyConverter(Type type,
         Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
@@ -71,6 +77,8 @@ public interface Converter<F, T> {
      * specified by {@link Field @Field}, {@link FieldMap @FieldMap} values,
      * {@link Header @Header}, {@link HeaderMap @HeaderMap}, {@link Path @Path},
      * {@link Query @Query}, and {@link QueryMap @QueryMap} values.
+     * 
+     * 【wanghailu】这个方法为Field、FieldMap、Header、HeaderMap、Path、Query、QueryMap数据类型创建Convert。
      */
     public @Nullable Converter<?, String> stringConverter(Type type, Annotation[] annotations,
         Retrofit retrofit) {
@@ -80,6 +88,8 @@ public interface Converter<F, T> {
     /**
      * Extract the upper bound of the generic parameter at {@code index} from {@code type}. For
      * example, index 1 of {@code Map<String, ? extends Runnable>} returns {@code Runnable}.
+     * 
+     * 【wanghailu】
      */
     protected static Type getParameterUpperBound(int index, ParameterizedType type) {
       return Utils.getParameterUpperBound(index, type);
@@ -88,6 +98,7 @@ public interface Converter<F, T> {
     /**
      * Extract the raw class type from {@code type}. For example, the type representing
      * {@code List<? extends Runnable>} returns {@code List.class}.
+     * 【】
      */
     protected static Class<?> getRawType(Type type) {
       return Utils.getRawType(type);

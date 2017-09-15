@@ -123,13 +123,39 @@ public final class Retrofit {
    *   Call&lt;List&lt;Item&gt;&gt; categoryList(@Path("cat") String a, @Query("page") int b);
    * }
    * </pre>
+   * 
+   * 【wanghailu】
+   * 创建由{@code service}Interface定义的API的对象实现。
+   * 给定方法的相对路径是从描述方法的注释获得的。内置的方法：GET、PUT、POST、PATCH、HEAD、DELETE、OPTIONS以及自定义方法 @HTTP。
+   * @Path ：用于方法参数，可以替换URL的部分。替换部分由标识符大括号标示。@Query：将项目添加到URL的查询字符串
+   * @Body：请求的正文由{@Body}注释表示。该
+   * 对象将被 Converter.Factory转换为Request描述。RequestBody亦可以用于创建对象描述。
+   * 方法注释和对应方式支持备用请求体格式
+   * 
+   * @FormUrlEncoded} - 具有键值的表单编码数据。@Field参数注释指定的对。
+   * @Multipart} - 符合RFC 2388的MultiPart数据。@Part参数注释指定的部分。
+   * @Headers：可以为端点添加额外的静态头。
+   * @Header：针对每个请求的控制。
+   * Call<T>:方法返回代表HTTP请求响应体类型，将由Converter.Factory转换为实例。
+   *  ResponseBody也可以用于原始的对象表示。如果您不关心Body内容，可以使用Void。
+   * 
    */
   @SuppressWarnings("unchecked") // Single-interface proxy creation guarded by parameter safety.
   public <T> T create(final Class<T> service) {
     Utils.validateServiceInterface(service);
     if (validateEagerly) {
+      /**
+       *  【wanghailu】
+       *  1、T对应的接口中，声明的方法不允许void类型。
+       *  2、开始调用Retrofit#callAdapter，得到CallAdapter对象。
+       *  3、执行CallAdapter#responseType()，得到ResponseType，得到响应类型。
+       *  返回类型必须为：Response.class、okhttp3.Response.class
+       *  4、开始调用Retrofit#responseBodyConverter。
+       *  5、进行Annotation进行解析,得到Method、url等。
+       */
       eagerlyValidateMethods(service);
     }
+    //【wanghailu】Java动态代理 在Android平台，得到ExecutorCallbackCall。
     return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[] { service },
         new InvocationHandler() {
           private final Platform platform = Platform.get();
@@ -404,6 +430,7 @@ public final class Retrofit {
       this.platform = platform;
       // Add the built-in converter factory first. This prevents overriding its behavior but also
       // ensures correct behavior when using converters that consume all types.
+      // 【wanghailu】内置Converter
       converterFactories.add(new BuiltInConverters());
     }
 
@@ -505,6 +532,7 @@ public final class Retrofit {
      * Base URL: http://example.com<br>
      * Endpoint: //github.com/square/retrofit/<br>
      * Result: http://github.com/square/retrofit/ (note the scheme stays 'http')
+     * 【wanghailu】baseUrl必须以“/”结尾
      */
     public Builder baseUrl(HttpUrl baseUrl) {
       checkNotNull(baseUrl, "baseUrl == null");
@@ -517,6 +545,7 @@ public final class Retrofit {
     }
 
     /** Add converter factory for serialization and deserialization of objects. */
+    // 【wanghailu】Convert.Factory加入集合中
     public Builder addConverterFactory(Converter.Factory factory) {
       converterFactories.add(checkNotNull(factory, "factory == null"));
       return this;
@@ -525,6 +554,7 @@ public final class Retrofit {
     /**
      * Add a call adapter factory for supporting service method return types other than {@link
      * Call}.
+     *【wanghailu】CallAdapter.Factory加入集合中
      */
     public Builder addCallAdapterFactory(CallAdapter.Factory factory) {
       adapterFactories.add(checkNotNull(factory, "factory == null"));
@@ -537,6 +567,7 @@ public final class Retrofit {
      * <p>
      * Note: {@code executor} is not used for {@linkplain #addCallAdapterFactory custom method
      * return types}.
+     *
      */
     public Builder callbackExecutor(Executor executor) {
       this.callbackExecutor = checkNotNull(executor, "executor == null");
@@ -546,6 +577,7 @@ public final class Retrofit {
     /**
      * When calling {@link #create} on the resulting {@link Retrofit} instance, eagerly validate
      * the configuration of all methods in the supplied interface.
+     * 【wanghailu】
      */
     public Builder validateEagerly(boolean validateEagerly) {
       this.validateEagerly = validateEagerly;
@@ -557,6 +589,13 @@ public final class Retrofit {
      * <p>
      * Note: If neither {@link #client} nor {@link #callFactory} is called a default {@link
      * OkHttpClient} will be created and used.
+     * 
+     * 【wanghailu】
+     * 1、默认：okhttp3.Call.Factory = OkHttpClient
+     * 2、Android平台：Executor callbackExecutor 来自Handler实现。{@link Platform.Android#MainThreadExecutor}
+     * 3、Android平台CallAdapterFactories = ExecutorCallAdapterFactory，且Executor = 2中的Handler。
+     * 4、converterFactories默认不存在。
+     * 5、validateEagerly：是否急切的验证方法 {@link Retrofit#create(Class)}
      */
     public Retrofit build() {
       if (baseUrl == null) {

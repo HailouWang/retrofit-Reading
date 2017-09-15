@@ -29,6 +29,7 @@ import okhttp3.Request;
  * is busy writing its request or reading its response may receive a {@link IOException}; this is
  * working as designed.
  *
+ *【wnaghailu】参数T，成功获取的相应对应的数据
  * @param <T> Successful response body type.
  */
 public interface Call<T> extends Cloneable {
@@ -65,6 +66,7 @@ public interface Call<T> extends Cloneable {
   /**
    * Create a new, identical call to this one which can be enqueued or executed even if this call
    * has already been.
+   * 【wanghailu】与本体类同的call调用，可以被enqueued或者executed，尽管之前已经存在过相同的对象
    */
   Call<T> clone();
 

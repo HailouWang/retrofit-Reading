@@ -25,6 +25,11 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 
+/**
+ * 【wanghailu】平台封装类，目前存在Java 8、Android平台。
+ * @author ifei
+ *
+ */
 class Platform {
   private static final Platform PLATFORM = findPlatform();
 
@@ -97,6 +102,10 @@ class Platform {
       return new ExecutorCallAdapterFactory(callbackExecutor);
     }
 
+    /**
+     * 【wanghailu】Executor的工作劳工 = Handler，且其Looper是MainLooper。
+     *
+     */
     static class MainThreadExecutor implements Executor {
       private final Handler handler = new Handler(Looper.getMainLooper());
 
